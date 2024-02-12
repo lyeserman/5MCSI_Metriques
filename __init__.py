@@ -32,5 +32,9 @@ def mongraphique():
     return render_template("graphique.html")
 
 
+@app.route("/histogramme/")
+def mongraphique():
+    return render_template("histogramme.html")
+
 if __name__ == "__main__":
   app.run(debug=True)
