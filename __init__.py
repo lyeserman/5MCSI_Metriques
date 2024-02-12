@@ -39,6 +39,9 @@ def monhistogramme():
 def moncontact():
     return render_template("contact.html")
 
+@app.route("/commit/")
+def moncommit():
+    return render_template("commit.html")
 
 if __name__ == "__main__":
   app.run(debug=True)
