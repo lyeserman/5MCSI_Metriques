@@ -9,7 +9,7 @@
 
         function drawChart(dataArray) {
             var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Date de Commit');
+            data.addColumn('string', 'Timestamp');
             data.addColumn('number', 'Nombre de Commits');
 
             dataArray.forEach(function (row) {
@@ -20,7 +20,8 @@
                 title: 'Commits par Timestamp',
                 hAxis: { title: 'Timestamp', slantedText: true, slantedTextAngle: 45 },
                 vAxis: { title: 'Nombre de Commits' },
-                legend: 'none'
+                legend: 'none',
+                bar: { groupWidth: '95%' }
             };
 
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
@@ -30,19 +31,33 @@
         async function loadCommitData() {
             const response = await fetch('https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits');
             const commits = await response.json();
-            const dataArray = [];
+            const commitsCount = {}; // Object for counting commits per timestamp
 
+            // Aggregate commits by timestamp
             commits.forEach(commit => {
-                // Extrait la date complète du commit
-                const fullDate = commit.commit.author.date;
-                // Convertit cette date en un format lisible
-                const date = new Date(fullDate);
-                const dateString = date.toISOString();
-                // Ajoute la date et un nombre de commits de 1 pour chaque commit au tableau
-                dataArray.push([dateString, 1]);
+                const timestamp = commit.commit.author.date;
+                if (commitsCount[timestamp]) {
+                    commitsCount[timestamp]++;
+                } else {
+                    commitsCount[timestamp] = 1;
+                }
             });
 
-            drawChart(dataArray);
+            // Prepare data for Google Charts
+            const dataArray = Object.keys(commitsCount).map(timestamp => {
+                return [timestamp, commitsCount[timestamp]];
+            });
+
+            // Sort data by timestamp
+            dataArray.sort((a, b) => new Date(a[0]) - new Date(b[0]));
+
+            // Convert to DataTable format
+            const dataTable = [['Timestamp', 'Nombre de Commits']];
+            dataArray.forEach(item => {
+                dataTable.push(item);
+            });
+
+            drawChart(dataTable);
         }
 
         google.charts.setOnLoadCallback(loadCommitData);
