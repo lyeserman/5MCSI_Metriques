@@ -5,44 +5,40 @@
     <title>Commits par Minute</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
-        google.charts.load('current', {'packages':['corechart']});
+     google.charts.load('current', {'packages':['corechart']});
 
-        // Fonction pour dessiner le graphique
-        function drawChart(dataArray) {
-            var data = google.visualization.arrayToDataTable(dataArray);
+function drawChart(dataArray) {
+    var data = google.visualization.arrayToDataTable(dataArray, false); // false pour indiquer que la première ligne contient les labels
 
-            var options = {
-                title: 'Commits par Minute',
-                legend: { position: 'bottom' }
-            };
+    var options = {
+        title: 'Commits par Minute',
+        legend: { position: 'bottom' }
+    };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-            chart.draw(data, options);
+    var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+}
+
+function loadCommitData() {
+    // Simulons une réponse de l'API pour l'exemple
+    const commitsData = [
+        ['Minute', 'Nombre de Commits'], // Les labels pour les colonnes
+        ['10', 5], // Exemple de données, où '10' est la minute et 5 le nombre de commits
+        ['20', 8], // Assurez-vous que ces valeurs sont correctes selon vos données
+    ];
+
+    // Transformation des données pour s'assurer que l'axe des Y est numérique
+    const transformedData = commitsData.map(row => {
+        if (row[1] !== 'Nombre de Commits') { // S'assurer de ne pas convertir l'en-tête
+            return [row[0], parseInt(row[1], 10)]; // Convertir la chaîne de caractères en entier
         }
+        return row; // Retourner l'en-tête sans modification
+    });
 
-        // Fonction pour charger les données des commits et les traiter
-        async function loadCommitData() {
-            const response = await fetch('https://api.github.com/repos/OpenRSI/5MCSI_Metriques/commits');
-            const commits = await response.json();
-            const minutesCount = {}; // Pour compter les commits par minute
+    drawChart(transformedData);
+}
 
-            for (const commit of commits) {
-                // Ici, vous devriez appeler votre route Flask pour extraire les minutes
-                // et incrémenter le compteur pour chaque minute.
-                // Cet exemple ne montre pas cette étape pour simplifier.
-            }
-
-            // Convertir les données en un format utilisable par Google Charts
-            const dataArray = [['Minute', 'Nombre de Commits']];
-            // Ici, ajoutez vos données traitées à dataArray
-
-            // Dessiner le graphique avec les données traitées
-            google.charts.setOnLoadCallback(() => drawChart(dataArray));
-        }
-    </script>
-</head>
-<body>
-    <div id="chart_div" style="width: 900px; height: 500px;"></div>
-    <script>loadCommitData();</script>
+google.charts.setOnLoadCallback(loadCommitData);
+   
 </body>
 </html>
